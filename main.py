@@ -3,7 +3,7 @@ import forms
 from flask import flash
 from flask_wtf.csrf import CSRFProtect
 from flask import g
-from flask import redirect
+from flask import redirectj
 from config import DevelopmentConfig
 from models import db
 from models import Alumnos
@@ -19,13 +19,26 @@ def page_not_find(e):
     return render_template('404.html'),404
 
 
-@app.route("/index")
+@app.route("/index", methods=["GET", "POST"])
 def index():
-    g.nombre = 'Daniel'
-    escuela = "UTL"
-    alumnos = ["Mario", "Pedro", "Luis", "Dario"]
+    alum_form = forms.UsersForm2(request.form)
+    if request.method == 'POST':
+        alum = Alumnos(nombre = alum_form.nombre.data, 
+                       apaterno = alum_form.apaterno.data, 
+                       email = alum_form.email.data)
 
-    return render_template("index.html", escuela=escuela, alumnos=alumnos)
+        db.session.add(alum)
+        db.session.commit()
+
+    return render_template("index.html", form=alum_form)
+ 
+
+@app.route("/ABC_Completo", methods=["GET", "POST"])
+def ABC_Completo():
+    alum_form = forms.UsersForm2(request.form)
+    alumno = Alumnos.query.all()
+    return render_template("ABC_Completo.html", alumno=alumno)
+
 
 @app.route("/alumnos", methods=["GET", "POST"])
 def alumnos():
