@@ -3,7 +3,7 @@ import forms
 from flask import flash
 from flask_wtf.csrf import CSRFProtect
 from flask import g
-from flask import redirectj
+from flask import redirect
 from config import DevelopmentConfig
 from models import db
 from models import Alumnos
@@ -31,7 +31,50 @@ def index():
         db.session.commit()
 
     return render_template("index.html", form=alum_form)
- 
+
+@app.route("/eliminar", methods=["GET", "POST"])
+def eliminar():
+    alum_form = forms.UsersForm2(request.form)
+    if request.method == 'GET':
+        id = request.args.get('id')
+        alum1 = db.session.query(Alumnos).filter(Alumnos.id == id).first()
+        alum_form.id.data = request.args.get('id')
+        alum_form.nombre.data = alum1.nombre
+        alum_form.apaterno.data = alum1.apaterno
+        alum_form.email.data = alum1.email
+
+    elif request.method == 'POST':
+        id = alum_form.id.data
+        alum = Alumnos.query.get(id)
+        db.session.delete(alum)
+        db.session.commit()
+        return redirect('ABC_Completo')
+    
+    return render_template("eliminar.html", form=alum_form)
+
+@app.route("/modificar", methods=["GET", "POST"])
+def modificar():
+    alum_form = forms.UsersForm2(request.form)
+    if request.method == 'GET':
+        id = request.args.get('id')
+        alum1 = db.session.query(Alumnos).filter(Alumnos.id == id).first()
+        alum_form.id.data = request.args.get('id')
+        alum_form.nombre.data = alum1.nombre
+        alum_form.apaterno.data = alum1.apaterno
+        alum_form.email.data = alum1.email
+    
+    elif request.method == 'POST':
+        id = alum_form.id.data
+        alum1 = db.session.query(Alumnos).filter(Alumnos.id == id).first()
+        alum1.nombre = alum_form.nombre.data
+        alum1.apaterno = alum_form.apaterno.data
+        alum1.email = alum_form.email.data
+        db.session.add(alum1)
+        db.session.commit()
+        return redirect('ABC_Completo')
+    
+    return render_template("modificar.html", form=alum_form)
+
 
 @app.route("/ABC_Completo", methods=["GET", "POST"])
 def ABC_Completo():
